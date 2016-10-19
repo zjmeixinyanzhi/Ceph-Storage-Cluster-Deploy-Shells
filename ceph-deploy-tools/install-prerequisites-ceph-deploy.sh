@@ -24,6 +24,16 @@ for ((i=0; i<${#hypervisor_map[@]}; i+=1));
         ssh root@$ip mkdir -p $target_sh
         scp $source_sh root@$ip:$target_sh
         ssh root@$ip chmod -R +x $target_sh
-        ssh root@$ip $target_sh/$sh_name
+        ssh root@$ip $target_sh/$sh_name  $deploy_user $password_deploy_user
   done;
-
+### add deploy-user SSH
+su - $deploy_user -c /usr/bin/ssh-keygen
+for ((i=0; i<${#hypervisor_map[@]}; i+=1));
+  do
+      name=${nodes_name[$i]};
+      ip=${hypervisor_map[$name]};
+      echo "-------------$name------------"
+      ssh-copy-id -i /home/$deploy_user/.ssh/id_rsa.pub $deploy_user@$ip
+      ssh-copy-id -i /home/$deploy_user/.ssh/id_rsa.pub $deploy_user@$(echo $data_network|cut -d "." -f1-3).$(echo $ip|awk -F "." '{print $4}')
+      ssh-copy-id -i /home/$deploy_user/.ssh/id_rsa.pub $deploy_user@$(echo $store_network|cut -d "." -f1-3).$(echo $ip|awk -F "." '{print $4}')
+  done;

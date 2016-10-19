@@ -17,15 +17,6 @@ for ((i=0; i<${#hypervisor_map[@]}; i+=1));
         ssh root@$name  rm -rf $osd_path/*
   done;
 
-mkdir -p /root/my-cluster
-cd /root/my-cluster
-rm -rf /root/my-cluster/*
-ceph-deploy new $deploy_node
-echo "public network ="$local_network>>ceph.conf
-echo "cluster network ="$store_network>>ceph.conf
-
-ceph-deploy install --nogpgcheck --repo-url $base_location/download.ceph.com/rpm-$ceph_release/el7/ ${nodes_name[@]} --gpg-url $base_location/download.ceph.com/release.asc
-ceph-deploy mon create-initial
 
 osds="";
 echo $osds
@@ -40,12 +31,25 @@ for ((i=0; i<${#hypervisor_map[@]}; i+=1));
         ssh root@$name  chown -R ceph:ceph $osd_path
   done;
 echo $osds
+#cp 0-set-config.sh /home/$deploy_user/
+su - $deploy_user <<HERE
+echo $osds
+#. /home/$deploy_user/0-set-config.sh  
+mkdir -p ~/my-cluster
+cd ~/my-cluster
+rm -rf ~/my-cluster/*
+ceph-deploy new $deploy_node
+echo "public network ="$local_network>>ceph.conf
+echo "cluster network ="$store_network>>ceph.conf
+ceph-deploy install --nogpgcheck --repo-url $base_location/download.ceph.com/rpm-$ceph_release/el7/ ${nodes_name[@]} --gpg-url $base_location/download.ceph.com/release.asc
+ceph-deploy mon create-initial
 ###[部署节点]激活OSD
 ceph-deploy osd prepare $osds
 ceph-deploy osd activate $osds
 ceph-deploy admin ${nodes_name[@]}
 
-
+#rm -rf /home/$deploy_user/0-set-config.sh 
+HERE
 ### set
 for ((i=0; i<${#hypervisor_map[@]}; i+=1));
   do
@@ -55,7 +59,7 @@ for ((i=0; i<${#hypervisor_map[@]}; i+=1));
         if [ $name =  $deploy_node ]; then
           echo $name" already is mon!"
         else
-          ceph-deploy mon add $name
+          su - $deploy_user -c "cd ~/my-cluster;ceph-deploy mon add $name"
         fi
   done;
 
