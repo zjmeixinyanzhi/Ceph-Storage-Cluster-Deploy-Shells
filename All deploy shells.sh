@@ -263,11 +263,20 @@ echo "cluster network ="$store_network>>ceph.conf
 ceph-deploy install --nogpgcheck --repo-url $base_location/download.ceph.com/rpm-$ceph_release/el7/ ${nodes_name[@]} --gpg-url $base_location/download.ceph.com/release.asc
 ceph-deploy mon create-initial
 ###[部署节点]激活OSD
+
+echo $osds > tmp.txt
+sed -i -e 's#'"$osd_path"'#'"$osd_path"1'#g' tmp.txt
+echo $(cat tmp.txt)
+
 ceph-deploy osd prepare $osds
-ceph-deploy osd activate $osds
+ceph-deploy osd activate $(cat tmp.txt)
+
 ceph-deploy admin ${nodes_name[@]}
 
 #rm -rf /home/$deploy_user/0-set-config.sh
+
+rm -rf tmp.txt
+
 HERE
 ### set
 for ((i=0; i<${#hypervisor_map[@]}; i+=1));
