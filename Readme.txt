@@ -5,7 +5,7 @@
 nonprivilege为普通用户执行ceph-deploy自动安装ceph集群
 
 1、修改安装配置文件
-默认：挂载一块盘到指定目录/osd
+默认：ceph自动挂载磁盘设备，配置文件中OSD盘挂载目录配置项写未挂载的磁盘设备名称,如/dev/sdb，可利用lsblk命令查看设备名称及挂载情况，
 vim 0-set-config.sh
 . 0-set-config.sh
 
