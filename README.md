@@ -2,12 +2,11 @@
 ## 说明：
 * CentOS 7.2部署Ceph
 * root用户执行ceph-deploy安装ceph集群
-* nonprivilege为普通用户执行ceph-deploy自动安装ceph集群
 
 ## 使用步骤
 
 1、修改安装配置文件
-默认：提前挂载好OSD盘到指定目录，如mount /dev/sdb /osd，配置文件中osd_path填上/osd即可
+默认：OSD盘指定为/dev裸磁盘设备而并非目录，无需挂载(/dev/sdb) 在配置文件中osd_path指定即可
 ```shell
 vim 0-set-config.sh
 . 0-set-config.sh
@@ -25,7 +24,6 @@ vim 0-set-config.sh
 ```shell
 . set-chrony.sh
 ```
-
 5、安装部署，利用普通用户执行ceph-deploy
 ```shell
 . install-configure-ceph-storage-cluster.sh
